@@ -1,0 +1,76 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Easy
+model Song {
+  id        Int      @id @default(autoincrement())
+  songName  String
+  artist    String
+  genre     String
+}
+
+// Medium   Todo: sjekke om det er mulig å lage en relasjon mellom event og rsvp
+model Event {
+  id          Int      @id @default(autoincrement())
+  eventName   String
+  description String
+  date        DateTime
+  rsvps       RSVP[]
+}
+
+enum attendanceStatus {
+  GOING
+  NOT_GOING
+  MAYBE
+}
+
+model RSVP {
+  id          Int     @id @default(autoincrement())
+  event       Event @relation(fields: [eventId], references: [id])
+  eventId     Int
+  userName    String
+  email       String
+  attendance  attendanceStatus @default(MAYBE)
+}
+
+// Hard
+model Student {
+  id                Int      @id @default(autoincrement())
+  name              String
+  email             String   @unique
+  assignments       Assignment[] @relation("StudentAssignments")
+  completions       Completion[]
+}
+
+model Assignment {
+  id                Int      @id @default(autoincrement())
+  title             String
+  description       String
+  dueDate           DateTime
+  students          Student[] @relation("StudentAssignments")
+  completions       Completion[]
+}
+
+model Completion {
+  id                Int      @id @default(autoincrement())
+  student           Student @relation(fields: [studentId], references: [id])
+  studentId         Int
+  assignment        Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  assignmentId      Int
+  dateCompleted     DateTime
+  notes             String
+
+  @@unique([studentId, assignmentId])
+}
