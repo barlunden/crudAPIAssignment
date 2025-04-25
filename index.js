@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 
 const easyRouter = require("./tasks/easy");
 const mediumRouter = require("./tasks/medium");
-const hardRouter = require("./tasks/hard");
+const hardRouter = require("./tasks/hard.js");
 
 const PORT = 4009;
 
