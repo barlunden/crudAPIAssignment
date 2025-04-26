@@ -9,4 +9,13 @@ const validateBody = (schema) => (req, res, next) => {
   next();
 };
 
-module.exports = { validateBody };
+const validateParams = (schema) => (req, res, next) => {
+  const result = schema.safeParse(req.params);
+  if (!result.success) {
+    return res.status(400).json({ errors: result.error.errors });
+  }
+  req.params = result.data;
+  next();
+};
+
+module.exports = { validateBody, validateParams };

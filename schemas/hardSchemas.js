@@ -1,4 +1,4 @@
-const { z } = require("zod");
+const { z, number, date } = require("zod");
 
 // Student model
 const addStudentSchema = z.object({
@@ -16,8 +16,14 @@ const assignHomeworkSchema = z.object({
   studentIds: z.array(z.number().int().positive()).min(1),
 });
 
+// Validates the assignmentId parameter
+// in the URL for the update and delete routes
+// and the completedAssignment route
 const assignmentParamSchema = z.object({
-  assignmentId: z.string().regex(/^\d+$/),
+  assignmentId: z
+    .string()
+    .regex(/^\d+$/, "Invalid assignment ID format.")
+    .transform((val) => Number(val)),
 });
 
 const updateAssignmentSchema = z.object({
@@ -26,9 +32,29 @@ const updateAssignmentSchema = z.object({
   dueDate: z.string().datetime().optional(),
 });
 
+const completedAssignmentSchema = z.object({
+  assignmentId: z.union([
+    z
+      .string()
+      .regex(/^\d+$/, "Invalid assignment ID format.")
+      .transform(number),
+    z.number().int().positive(),
+  ]),
+  studentId: z.union([
+    z
+      .string()
+      .regex(/^\d+$/, "Invalid assignment ID format.")
+      .transform(number),
+    z.number().int().positive(),
+  ]),
+  dateCompleted: z.string().datetime(),
+  notes: z.string().max(1000).optional(),
+});
+
 module.exports = {
   addStudentSchema,
   assignHomeworkSchema,
   assignmentParamSchema,
   updateAssignmentSchema,
+  completedAssignmentSchema,
 };
