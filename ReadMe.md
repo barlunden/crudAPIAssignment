@@ -1,6 +1,6 @@
 # CRUD API Assignment
 
-## Easy Model
+## Easy Tasks
 ### /add-song
 POST /add-song
 Content-Type: application/json
@@ -15,7 +15,7 @@ Content-Type: application/json
 GET /get-songs
 *Returns all songs on record*
 
-## Medium Model
+## Medium Tasks
 ### /add-event
 POST /add-event
 Content-Type: application/json
@@ -41,4 +41,30 @@ Content-Type: application/json
     "eventId": 1
 }
 
-*attendanceEnum(['GOING', 'MAYBE','NOT_GOING'])*
+*attendanceEnum(['GOING', 'MAYBE', 'NOT_GOING'])*
+
+### /get-rsvps/:eventId
+GET /get-rsvps/:eventId
+
+*Returns event details that corresponds with eventId*
+
+## Hard Tasks
+### /assign-homework
+POST /assign-homework
+Content-Type: application/json
+
+**Adds a new assignment to students in the student model**
+{
+  "assignment": {
+    "title": "Rhythm is king",
+    "description": "Practice your moves for the final dance",
+    "dueDate": "2025-05-01T23:59:00.000Z"
+  },
+  "studentIds": [2, 3, 4]
+}
+
+**Adds an existing assignment to any student not previously assigned to task**
+{
+  "assignmentId": 1,
+  "studentIds": [1]
+}
