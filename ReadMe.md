@@ -23,7 +23,7 @@ Content-Type: application/json
 {
     "eventName": "",
     "description": "",
-    "date": ""
+    "date": "YYYY-MM-DD"
 }
 
 ### /get-events
@@ -99,7 +99,7 @@ Content-Type: application/json
 {
     "studentId": 1,
     "assignmentId": 1,
-    "dateCompleted": dateTime,
+    "dateCompleted": "2025-05-01T23:59:00.000Z",
     "notes": "Done and dusted",
 }
 
@@ -107,3 +107,8 @@ Content-Type: application/json
 GET /completed-assignment/:assignmentId
 
 **Lists the corresponding assignment and the students claiming to have completed it.**
+
+#### Things I consider further work on:
+1. Change the dueDate on assignments to YYYY-MM-DD format as well
+2. Validate that the dateCompleted is *after* the dueDate.
+3. Make attendance non-case sensitive. In a user interface it would probably be a selector of some sorts.
