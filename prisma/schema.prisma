@@ -15,16 +15,16 @@ datasource db {
 
 // Easy
 model Song {
-  id        Int      @id @default(autoincrement())
-  songName  String
-  artist    String
-  genre     String
+  id       Int    @id @default(autoincrement())
+  songName String @unique
+  artist   String
+  genre    String
 }
 
 // Medium   Todo: sjekke om det er mulig å lage en relasjon mellom event og rsvp
 model Event {
   id          Int      @id @default(autoincrement())
-  eventName   String
+  eventName   String   @unique
   description String
   date        DateTime
   rsvps       RSVP[]
@@ -37,40 +37,40 @@ enum attendanceStatus {
 }
 
 model RSVP {
-  id          Int     @id @default(autoincrement())
-  event       Event @relation(fields: [eventId], references: [id])
-  eventId     Int
-  userName    String
-  email       String
-  attendance  attendanceStatus @default(MAYBE)
+  id         Int              @id @default(autoincrement())
+  event      Event            @relation(fields: [eventId], references: [id])
+  eventId    Int
+  userName   String
+  email      String
+  attendance attendanceStatus @default(MAYBE)
 }
 
 // Hard
 model Student {
-  id                Int      @id @default(autoincrement())
-  name              String
-  email             String   @unique
-  assignments       Assignment[] @relation("StudentAssignments")
-  completions       Completion[]
+  id          Int          @id @default(autoincrement())
+  name        String
+  email       String       @unique
+  assignments Assignment[] @relation("StudentAssignments")
+  completions Completion[]
 }
 
 model Assignment {
-  id                Int      @id @default(autoincrement())
-  title             String
-  description       String
-  dueDate           DateTime
-  students          Student[] @relation("StudentAssignments")
-  completions       Completion[]
+  id          Int          @id @default(autoincrement())
+  title       String
+  description String
+  dueDate     DateTime
+  students    Student[]    @relation("StudentAssignments")
+  completions Completion[]
 }
 
 model Completion {
-  id                Int      @id @default(autoincrement())
-  student           Student @relation(fields: [studentId], references: [id])
-  studentId         Int
-  assignment        Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
-  assignmentId      Int
-  dateCompleted     DateTime
-  notes             String
+  id            Int        @id @default(autoincrement())
+  student       Student    @relation(fields: [studentId], references: [id])
+  studentId     Int
+  assignment    Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  assignmentId  Int
+  dateCompleted DateTime
+  notes         String
 
   @@unique([studentId, assignmentId])
 }

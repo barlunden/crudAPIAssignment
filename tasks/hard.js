@@ -272,7 +272,7 @@ router.get(
         dateCompleted: completion.dateCompleted,
         notes: completion.notes,
       }));
-      res.send({
+      res.status(201).json({
         Success: "Completions retrieved successfully",
         assignment: assignment.assignmentName,
         completions: result,
