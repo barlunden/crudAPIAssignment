@@ -53,9 +53,12 @@ GET /get-rsvps/:eventId
 POST /add-student
 Content-Type: application/json
 
-**Adds a student to the student
+**Adds a student to the student roster**
 
-{}
+{
+  "name": "Name Nameson",
+  "email: "email@emailson.com"
+}
 
 ### /assign-homework
 POST /assign-homework
