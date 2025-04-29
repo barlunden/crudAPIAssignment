@@ -49,6 +49,14 @@ GET /get-rsvps/:eventId
 *Returns event details that corresponds with eventId*
 
 ## Hard Tasks
+### /add-student
+POST /add-student
+Content-Type: application/json
+
+**Adds a student to the student
+
+{}
+
 ### /assign-homework
 POST /assign-homework
 Content-Type: application/json
