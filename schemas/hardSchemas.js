@@ -7,18 +7,21 @@ const addStudentSchema = z.object({
 });
 
 // Assignment model
-const assignHomeworkSchema = z.object({
-  assignment: z.object({
-    title: z.string().min(2).max(100),
-    description: z.string().min(5).max(1000),
-    dueDate: z.string().datetime(),
-  }),
-  studentIds: z.array(z.number().int().positive()).min(1),
+const assignmentSchema = z.object({
+  title: z.string().min(1),
+  description: z.string().min(1),
+  dueDate: z.string().datetime(),
 });
 
-// Validates the assignmentId parameter
-// in the URL for the update and delete routes
-// and the completedAssignment route
+const assignHomeworkSchema = z.object({
+  assignmentId: z.number().int().positive().optional(),
+  assignment: assignmentSchema.optional(),
+  studentIds: z.array(z.number().int().positive()).min(1),
+}).refine(
+  data => data.assignmentId || data.assignment,
+  { message: "Provide an existing assignmentId in order to assign an existing task to a new student, or create a new assignment" }
+);
+
 const assignmentParamSchema = z.object({
   assignmentId: z
     .string()

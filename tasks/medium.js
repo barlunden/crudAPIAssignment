@@ -1,3 +1,5 @@
+// This file contains the endpoints for the Medium assignment
+
 const express = require("express");
 const { Prisma, PrismaClient } = require("@prisma/client");
 const { z } = require("zod");
@@ -9,15 +11,13 @@ const {
   rsvpParamSchema,
 } = require("../schemas/mediumSchemas");
 
-const {
-  validateBody,
-  validateParams,
-} = require("../middleware/validationMiddleware");
+const { validateBody } = require("../middleware/validationMiddleware");
 const prisma = new PrismaClient();
 
 const router = express.Router();
 
-// Medium task - the Event and RSPV models
+// the Event and RSPV models
+
 // Event model
 router.post("/add-event", validateBody(addEventSchema), async (req, res) => {
   const { eventName, description, date } = req.body;
@@ -72,6 +72,23 @@ router.post("/add-rsvp", validateBody(addRsvpSchema), async (req, res) => {
     return res.status(404).json({ error: "Event not found" });
   }
 
+  const existingRSVP = await prisma.rSVP.findUnique({
+    where: {
+      eventId_email: {
+        eventId: rsvpData.eventId,
+        email: rsvpData.email,
+      },
+    },
+  });
+
+  if (existingRSVP) {
+    return res
+      .status(409)
+      .json({
+        error: "You have already registered for this event with this email.",
+      });
+  }
+
   try {
     const rsvp = await prisma.rSVP.create({
       data: {
@@ -88,6 +105,16 @@ router.post("/add-rsvp", validateBody(addRsvpSchema), async (req, res) => {
       rsvp: `${rsvp.userName} says ${rsvp.attendance} to this event!`,
     });
   } catch (e) {
+    if (
+      e instanceof Prisma.PrismaClientKnownRequestError &&
+      e.code === "P2002"
+    ) {
+      return res
+        .status(409)
+        .json({
+          error: "You have already registered for this event with this email.",
+        });
+    }
     res.status(500).json({ error: "Internal server error" });
   }
 });

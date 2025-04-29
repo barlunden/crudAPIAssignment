@@ -1,13 +1,7 @@
-// This file contains the hard task routes for the assignment and completion models
-// and the bonus student model.
-// It includes routes for adding a student, assigning homework, updating assignments,
-// deleting assignments, marking assignments as completed, and retrieving completions.
-// It uses Prisma as the ORM to interact with the database and Zod for validation.
-// It also includes error handling for various scenarios, such as duplicate entries,
-// invalid IDs, and missing required fields.
+// This file contains the endpoints for the Hard assignment
 
 const express = require("express");
-const { PrismaClient } = require("@prisma/client");
+const { Prisma, PrismaClient } = require("@prisma/client");
 const { z } = require("zod");
 
 // Importing the validation middleware
@@ -30,10 +24,7 @@ const router = express.Router();
 
 // Student model
 
-// This route adds a student to the database
-// It expects a student object in the request body
-// The student object should contain the name and email
-// The email should be unique
+// /add-student
 router.post(
   "/add-student",
   validateBody(addStudentSchema),
@@ -66,56 +57,90 @@ router.post(
 
 // Assignment model
 
-// This route assigns homework to students
-// and creates an assignment in the database
-// It expects an assignment object and an array of student IDs
-// in the request body
-// The assignment object should contain the title, description, and due date
-// The student IDs should be an array of integers
+// /assign-homework
 router.post(
   "/assign-homework",
   validateBody(assignHomeworkSchema),
   async (req, res) => {
-    const { assignment, studentIds } = req.body;
-    const parseResult = assignHomeworkSchema.safeParse(req.body);
-
-    if (!parseResult.success) {
-      return res.status(400).json({ error: parseResult.error.errors });
-    }
+    let { assignmentId, assignment, studentIds } = req.body;
 
     try {
-      assignment = await prisma.assignment.create({
-        data: {
-          ...assignment,
-          students: {
-            connect: studentIds.map((id) => ({ id })),
+      if (!assignmentId && assignment) {
+        const existing = await prisma.assignment.findFirst({
+          where: {
+            title: assignment.title,
+            description: assignment.description,
+            dueDate: new Date(assignment.dueDate),
           },
-        },
-      });
-    } catch (e) {
-      if (e.code === "P2025") {
-        return res.status(404).json({
-          error: "One or more student IDs do not exist.",
         });
+        if (existing) {
+          assignmentId = existing.id;
+        } else {
+          const created = await prisma.assignment.create({
+            data: {
+              title: assignment.title,
+              description: assignment.description,
+              dueDate: new Date(assignment.dueDate),
+            },
+          });
+          assignmentId = created.id;
+        }
       }
 
-      res.send({
-        Success: "Assignment added successfully",
-        assignment,
-        studentIds,
+      if (!assignmentId) {
+        return res
+          .status(400)
+          .json({ error: "assignmentId is missing and can't be created." });
+      }
+
+      const existingLinks = await prisma.studentAssignment.findMany({
+        where: {
+          assignmentId,
+          studentId: { in: studentIds },
+        },
+        select: { studentId: true },
       });
+      const alreadyAssignedIds = existingLinks.map((link) => link.studentId);
+
+      const newStudentIds = studentIds.filter(
+        (id) => !alreadyAssignedIds.includes(id)
+      );
+      if (newStudentIds.length === 0) {
+        return res
+          .status(409)
+          .json({ error: "All students are assigned to this task" });
+      }
+
+      const result = await prisma.studentAssignment.createMany({
+        data: newStudentIds.map((studentId) => ({
+          studentId,
+          assignmentId,
+        })),
+      });
+
+      res.status(201).json({
+        success: "Assignment assigned!",
+        assignmentId,
+        assignedCount: result.count,
+        skipped: alreadyAssignedIds,
+      });
+    } catch (e) {
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === "P2002"
+      ) {
+        return res
+          .status(409)
+          .json({
+            error: "One or more students are already assigned to this task.",
+          });
+      }
+      return res.status(500).json({ error: "Internal server error" });
     }
   }
 );
 
-// This route updates an assignment in the database
-// It expects an assignment ID in the URL and an assignment object
-// in the request body
-// The assignment object could contain the title, description, and due date
-// and should only update the fields that are provided
-// The assignment ID should be a positive integer
-// If the assignment ID does not exist, it returns a 404 error
-// If the assignment ID exists, it updates the assignment and returns the updated assignment
+// /update-assignment/:assignmentId
 router.patch(
   "/update-assignment/:assignmentId",
   validateBody(updateAssignmentSchema),
@@ -143,10 +168,7 @@ router.patch(
   }
 );
 
-// This route deletes an assignment from the database
-// It expects an assignment ID in the URL
-// If the assignment ID does not exist, it returns a 404 error
-// If the assignment ID exists, it deletes the assignment and returns a success message
+// /delete-assignment/:assignmentId
 router.delete(
   "/delete-assignment/:assignmentId",
   validateParams(assignmentParamSchema),
@@ -171,16 +193,7 @@ router.delete(
 
 // Completion model
 
-// This route marks an assignment as completed by a student
-// It expects a student ID and an assignment ID in the request body
-// It also expects a dateCompleted and optional notes
-// The student ID and assignment ID should be positive integers
-// If the assignment ID does not exist, it returns a 404 error
-// If the student ID does not exist, it returns a 404 error
-// If the assignment has already been marked as completed by this student,
-// it returns a 400 error
-// If the assignment and student IDs are valid, it creates a completion
-// and returns a success message
+// /mark-completed
 router.post(
   "/mark-completed",
   validateBody(completedAssignmentSchema),
@@ -238,7 +251,7 @@ router.post(
   }
 );
 
-// This route retrieves all completions for a specific assignment
+// /completed-assignment/:assignmentId
 router.get(
   "/completed-assignment/:assignmentId",
   validateParams(assignmentParamSchema),

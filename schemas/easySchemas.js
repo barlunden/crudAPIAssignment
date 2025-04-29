@@ -1,4 +1,4 @@
-const { z, number, date } = require("zod");
+const { z } = require("zod");
 
 const addSongSchema = z.object({
   songName: z.string().min(2).max(100),

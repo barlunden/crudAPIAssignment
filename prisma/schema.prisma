@@ -43,6 +43,8 @@ model RSVP {
   userName   String
   email      String
   attendance attendanceStatus @default(MAYBE)
+
+  @@unique([eventId, email])
 }
 
 // Hard
@@ -50,16 +52,26 @@ model Student {
   id          Int          @id @default(autoincrement())
   name        String
   email       String       @unique
-  assignments Assignment[] @relation("StudentAssignments")
+  assignments StudentAssignment[]
   completions Completion[]
 }
+
+model StudentAssignment {
+  studentId   Int
+  assignmentId Int
+  student     Student   @relation(fields: [studentId], references: [id])
+  assignment  Assignment @relation(fields: [assignmentId], references: [id])
+
+  @@id([studentId, assignmentId])
+}
+
 
 model Assignment {
   id          Int          @id @default(autoincrement())
   title       String
   description String
   dueDate     DateTime
-  students    Student[]    @relation("StudentAssignments")
+  students    StudentAssignment[]
   completions Completion[]
 }
 

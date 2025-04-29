@@ -1,3 +1,5 @@
+// This file contains the endpoints for the Easy assignment
+
 const express = require("express");
 const { Prisma, PrismaClient } = require("@prisma/client");
 const { z } = require("zod");
@@ -10,7 +12,8 @@ const prisma = new PrismaClient();
 
 const router = express.Router();
 
-// Easy task - the Song model
+// the Song model
+// /add-song
 router.post("/add-song", validateBody(addSongSchema), async (req, res) => {
   const { songName, artist, genre } = req.body;
 
