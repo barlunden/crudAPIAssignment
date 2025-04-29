@@ -3,6 +3,7 @@
 ## Easy Model
 ### /add-song
 POST /add-song
+
 Content-Type: application/json
 
 {
@@ -12,6 +13,7 @@ Content-Type: application/json
 }
 
 GET /get-songs
+
 *Returns all songs on record*
 
 
