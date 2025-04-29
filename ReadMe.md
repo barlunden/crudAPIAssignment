@@ -85,4 +85,25 @@ PATCH /update-assignment/:assignmentId
     "title": "Rhythm is king II",
     "description": "Practice the choreography again and again",
 }
-*Leaving the dueDate unchanged*
+*This should leave the dueDate unchanged*
+
+### /delete-assignment/:assignmentId
+DELETE /delete-assignment/:assignmentId
+
+**Deletes the assignment and any completions corresponding to it**
+
+### /mark-completed
+POST /mark-completed
+Content-Type: application/json
+
+{
+    "studentId": 1,
+    "assignmentId": 1,
+    "dateCompleted": dateTime,
+    "notes": "Done and dusted",
+}
+
+### /completed-assignment/:assignmentId
+GET /completed-assignment/:assignmentId
+
+**Lists the corresponding assignment and the students claiming to have completed it.**
